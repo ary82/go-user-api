@@ -1,0 +1,7 @@
+services:
+  db:
+    image: scylladb/scylla
+    ports:
+      - "9042:9042"
+    volumes:
+      - "/var/lib/scylla:/var/lib/scylla"
