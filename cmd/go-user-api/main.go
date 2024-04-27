@@ -2,18 +2,37 @@ package main
 
 import (
 	"log"
+	"os"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/ary82/go-user-api/internal/database"
+	"github.com/ary82/go-user-api/internal/server"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	app := fiber.New()
+	// Load env vars
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
+	// DB Env Vars
+	var (
+		dbAddr    = os.Getenv("DB_ADDR")
+		namespace = os.Getenv("DB_NAMESPACE")
+	)
 
-	err := app.Listen(":3000")
+	// Server Env Vars
+	port := os.Getenv("PORT")
+
+	db, err := database.NewScyllaDB(dbAddr, namespace)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	server := server.NewServer(port, db)
+	err = server.Init()
 	if err != nil {
 		log.Fatal(err)
 	}
