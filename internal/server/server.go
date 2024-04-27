@@ -1,25 +1,32 @@
 package server
 
 import (
+	"log"
+
 	"github.com/ary82/go-user-api/internal/database"
 	"github.com/gofiber/fiber/v2"
 )
 
-type Server struct {
-	Addr string
-	DB   database.Database
+type FiberServer struct {
+	App *fiber.App
+	DB  database.Store
 }
 
-func NewServer(addr string, db database.Database) *Server {
-	return &Server{
-		Addr: addr,
-		DB:   db,
+func New(db database.Store) *FiberServer {
+	return &FiberServer{
+		App: fiber.New(),
+		DB:  db,
 	}
 }
 
-func (s *Server) Init() error {
-	app := fiber.New()
+func (s *FiberServer) Run(port string) {
+	s.RegisterRoutes()
 
-	err := app.Listen(s.Addr)
-	return err
+	// Start the Server in a goroutine
+	go func() {
+		err := s.App.Listen(port)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 }
