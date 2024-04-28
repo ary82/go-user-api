@@ -26,6 +26,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	err = db.InitTables()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Make and Run Server
 	server := server.New(db)
