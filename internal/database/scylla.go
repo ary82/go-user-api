@@ -85,11 +85,11 @@ func (s *ScyllaStore) GetUser(email string) (*User, error) {
 	query := `SELECT * FROM go_api.users WHERE email = ?`
 
 	user := new(User)
-	err := s.Session.Query(query).WithContext(ctx).Scan(
+	err := s.Session.Query(query, email).WithContext(ctx).Scan(
 		&user.Email,
-		&user.Name,
-		&user.HashedPass,
 		&user.CreatedAt,
+		&user.HashedPass,
+		&user.Name,
 		&user.UpdatedAt,
 	)
 	return user, err
