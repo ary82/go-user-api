@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/gocql/gocql"
@@ -44,6 +45,19 @@ func (s *ScyllaStore) CreateUser(email string, name string, hashed_pass string) 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
+	var exists int
+	checkUserQuery := `
+  SELECT count(1) FROM go_api.users 
+  WHERE email = ?
+  `
+	err := s.Session.Query(checkUserQuery, email).WithContext(ctx).Scan(&exists)
+	if err != nil {
+		return err
+	}
+	if exists > 0 {
+		return fmt.Errorf("user already exists")
+	}
+
 	query := `
   INSERT INTO go_api.users (
     email,
@@ -53,7 +67,7 @@ func (s *ScyllaStore) CreateUser(email string, name string, hashed_pass string) 
     updated_at
   ) VALUES (?, ?, ?, ?, ?)
   `
-	err := s.Session.Query(
+	err = s.Session.Query(
 		query,
 		email,
 		name,
